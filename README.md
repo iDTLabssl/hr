@@ -16,3 +16,4 @@ The following modules require `report_aeroo` from [lp:aeroo](https://launchpad.n
 * `hr_report_payroll_attendance_summary`
 * `hr_report_payroll_net`
 * `hr_report_turnover`
+
