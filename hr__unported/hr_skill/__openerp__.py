@@ -19,28 +19,23 @@
 #
 ###############################################################################
 
-from openerp.osv import fields, orm, osv
-from openerp import models, fields, api
-
-
-class hr_skill(orm.Model):
-
-    _name = 'hr.skill'
-
-    name  = fields.Char('Name', size=64, required=True, translate=True)
-    active = fields.Boolean('Active', default=True)
-    parent_id = fields.Many2one('hr.skill','Parent', ondelete='cascade' )
-    child_ids = fields.One2many('hr.skill', 'parent_id', 'Children' )
-     
-    view = fields.Selection([('view', 'View'),
-                             ('skill', 'Skill'),
-                              ],
-                              'Skill', required=True, default='view')
-
-    employee_ids = fields.Many2many( 'hr.employee', 'skill_employee_rel', 'skill_id', 'employee_id', 'Employee(s)' )
-
-
-class hr_employee(orm.Model):
-    _inherit = 'hr.employee'
-    
-    skill_ids = fields.Many2many( 'hr.skill', 'skill_employee_rel', 'employee_id', 'skill_id', 'Skills', domain = "[('view', '=', 'skill')]" )
+{
+    "name": "Skill Management",
+    "version": "0.1",
+    "category": "Human Resources",
+    "license": "AGPL-3",
+    "description": """
+    This module allows you to manage your company and employees skills.
+    """,
+    "author": "Savoir-faire Linux,Odoo Community Association (OCA)",
+    "website": "http://www.savoirfairelinux.com",
+    "depends": ["hr"],
+    'data': ["security/ir.model.access.csv",
+             "hr_skill_view.xml",
+             ],
+    "demo": [],
+    "test": [],
+    'installable': True,
+    "auto_install": False,
+    "images": [],
+}
