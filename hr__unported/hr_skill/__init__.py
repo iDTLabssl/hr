@@ -19,28 +19,4 @@
 #
 ###############################################################################
 
-from openerp.osv import fields, orm, osv
-from openerp import models, fields, api
-
-
-class hr_skill(orm.Model):
-
-    _name = 'hr.skill'
-
-    name  = fields.Char('Name', size=64, required=True, translate=True)
-    active = fields.Boolean('Active', default=True)
-    parent_id = fields.Many2one('hr.skill','Parent', ondelete='cascade' )
-    child_ids = fields.One2many('hr.skill', 'parent_id', 'Children' )
-     
-    view = fields.Selection([('view', 'View'),
-                             ('skill', 'Skill'),
-                              ],
-                              'Skill', required=True, default='view')
-
-    employee_ids = fields.Many2many( 'hr.employee', 'skill_employee_rel', 'skill_id', 'employee_id', 'Employee(s)' )
-
-
-class hr_employee(orm.Model):
-    _inherit = 'hr.employee'
-    
-    skill_ids = fields.Many2many( 'hr.skill', 'skill_employee_rel', 'employee_id', 'skill_id', 'Skills', domain = "[('view', '=', 'skill')]" )
+from . import hr_skill
