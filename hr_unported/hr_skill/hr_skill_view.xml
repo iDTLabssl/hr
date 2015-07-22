@@ -33,17 +33,34 @@
         <field name="type">form</field>
         <field name="arch" type="xml">
             <form string="Skill">
-                <field name="name" select="1" colspan="1"/>
-                <field name="active" select="1" />
+                <field name="name" colspan="1"/>
+                <field name="active" />
                 <newline/>
-                <field name="parent_id" select="1"/>
-                <field name="view" select="1"/>
+                <field name="parent_id"/>
+                <field name="view"/>
             </form>
         </field>
     </record>
 
+        <record model='ir.ui.view' id='view_skill_search'>
+            <field name="name">hr.skill.search</field>
+            <field name="model">hr.skill</field>
+            <field name="arch" type="xml">
+                <search string="Skills" >
+                <field name="name" />
+                <field name="active" />
+		<field name="parent_id" />
+		<field name="view" />
+
+                </search>
+            </field>
+        </record>
+
+
+
     <record model="ir.actions.act_window" id="open_view_skill_form">
-        <field name="res_model">hr.skill</field>
+	<field name="name">Skills</field>    
+    	<field name="res_model">hr.skill</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
     </record>
