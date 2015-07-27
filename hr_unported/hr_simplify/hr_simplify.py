@@ -55,17 +55,9 @@ class hr_employee(orm.Model):
 
         return res
 
-    _columns = {
-    #contract_id = fields.Many2one('hr.contract', 'Contract', compute = _get_id_from_contract, store=True,help='Latest contract of the employee' )
+    contract_id = fields.Many2one('hr.contract', 'Contract', compute ='_get_id_from_contract', store=True,help='Latest contract of the employee')
 
-        'contract_id': fields.function(
-            _get_latest_contract, string='Contract', type='many2one',
-            relation="hr.contract",
-            store={
-                'hr.contract': (
-                    _get_id_from_contract,
-                    ['id', 'date_start'], 10)},
-            help='Latest contract of the employee'),
+    _columns = {
 
     #job_id = fields.Many2one('hr.job',string='Job', related='contract_id.job_id', onchange =_get_id_from_contract ,readonly=True, store =True )
     # basically updte own contract_id and job_id
@@ -93,9 +85,8 @@ class hr_employee(orm.Model):
     ]
 
     def _default_country(self, cr, uid, context=None):
-
-        cid = self.pool.get('res.country').search(
-            cr, uid, [('code', '=', 'ET')], context=context)
+        
+        cid = self.env.['res.country'].search([('code', '=', 'ET')])
         if cid:
             return cid[0]
 
@@ -110,22 +101,13 @@ class hr_contract(orm.Model):
 
     _inherit = 'hr.contract'
 
-    _columns = {
-        'employee_dept_id': fields.related('employee_id',
-                                           'department_id',
-                                           type='many2one',
-                                           relation='hr.department',
-                                           string="Default Dept Id"),
-        'state': fields.selection(
-            [
-                ('draft', 'Draft'),
-                ('approve', 'Approved'),
-                ('decline', 'Declined'),
-            ],
-            'State',
-            readonly=True,
-        ),
-    }
+    employee_dept_id = fields.Integer(string="Default Dept Id", related = 'employee_id.department_id', default = '_default_employee')
+    state =fields.Selection([('draft', 'Draft'),
+                               ('approve', 'Approved'),
+                               ('decline', 'Declined'),
+                              ],
+                              'State', default='draft' )    
+
 
     def _default_employee(self, cr, uid, context=None):
         if context is not None:
@@ -133,37 +115,23 @@ class hr_contract(orm.Model):
             if e_ids:
                 return e_ids[0]
 
-    _defaults = {
-        'employee_id': _default_employee,
-        'state': 'draft',
-    }
 
-    def onchange_employee_id(self, cr, uid, ids, employee_id, context=None):
+    def onchange_employee_id(self):
 
-        dom = {
-            'job_id': [],
-        }
-        val = {
-            'employee_dept_id': [],
-        }
-        if employee_id:
-            dept_id = self.pool.get('hr.employee').browse(
-                cr, uid, employee_id,
-                context=context).department_id.id
-            dom['job_id'] = [('department_id', '=', dept_id)]
-            val['employee_dept_id'] = dept_id
-        return {'value': val, 'domain': dom}
+        if self.employee_id:
+            self.dept_id = self.env['hr.employee'].search([('id', '=', self.employee_id)]).department_id.id
+            self.employee_dept_id = self.dept_id
+
 
 
 class hr_job(orm.Model):
 
     def _no_of_contracts(self, cr, uid, ids, name, args, context=None):
         res = {}
-        for job in self.browse(cr, uid, ids, context=context):
-            contract_ids = self.pool.get(
-                'hr.contract').search(cr, uid, [('job_id', '=', job.id),
-                                                ('state', '!=', 'done')],
-                                      context=context)
+        for job in self:
+            contract_ids = self.env[
+                'hr.contract'].search([('job_id', '=', job.id),
+                                      ('state', '!=', 'done')])
             nb = len(contract_ids or [])
             res[job.id] = {
                 'no_of_employee': nb,
@@ -171,17 +139,20 @@ class hr_job(orm.Model):
             }
         return res
 
-    def _get_job_position(self, cr, uid, ids, context=None):
+    def _get_job_position(self):
         res = []
-        for contract in self.pool.get('hr.contract').browse(
-            cr, uid, ids, context=context
-        ):
+        contract_obj = self.env['hr.contract']
+        for contract in contract_obj:
             if contract.job_id:
                 res.append(contract.job_id.id)
         return res
 
     _name = 'hr.job'
     _inherit = 'hr.job'
+
+
+    no_of_employee = fileds.Integer(string="Current Number of Employees",compute ='_no_of_contracts',help='Number of employees currently occupying this job position.', )
+
 
     _columns = {
         'no_of_employee': fields.function(
