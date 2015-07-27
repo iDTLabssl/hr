@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 #
 #
-#    Copyright (C) 2011,2013 Michael Telahun Makonnen <mmakonnen@gmail.com>.
+#    Copyright (C) 2013 Michael Telahun Makonnen <mmakonnen@gmail.com>.
 #    All Rights Reserved.
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -20,32 +20,31 @@
 #
 
 {
-    'name': 'Simplify Employee Records.',
+    'name': 'Employment Status',
     'version': '1.0',
     'category': 'Generic Modules/Human Resources',
     'description': """
-Make Employee Records and Contracts Easier to Work With
-=======================================================
-    1. Make the job id in employee object reference job id in latest contract.
-    2. When moving from employee to contract pre-populate the employee field.
-    3. In the contract form show only those positions belonging to the
-       department the employee belongs to.
-    4. Make country (nationality) default to Ethiopia
-    5. Make official identification document number unique
+Employee's Employment Status
+============================
+
+Track the HR status of employees.
     """,
     'author': "Michael Telahun Makonnen <mmakonnen@gmail.com>,Odoo Community Association (OCA)",
     'website': 'http://miketelahun.wordpress.com',
     'license': 'AGPL-3',
     'depends': [
         'hr',
-        'hr_contract',
+        'hr_contract_state',
     ],
     'data': [
-        'hr_simplify_view.xml',
+        'security/ir.model.access.csv',
+        'wizard/end_contract_view.xml',
+        'hr_employee_data.xml',
+        'hr_employee_termination_workflow.xml',
+        'hr_employee_workflow.xml',
+        'hr_view.xml',
     ],
     'test': [
     ],
     'installable': False,
-    "auto_install": False,
-    "images": [],
 }
