@@ -25,7 +25,7 @@ import time
 from datetime import datetime
 
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as OE_DATEFORMAT
-from report import report_sxw
+from openerp report import report_sxw
 
 
 class report_payroll_summary(report_sxw.rml_parse):
