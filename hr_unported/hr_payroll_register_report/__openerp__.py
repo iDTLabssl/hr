@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 #
 #
-#    Copyright (C) 2013 Michael Telahun Makonnen <mmakonnen@gmail.com>.
+#    Copyright (C) 2011,2013 Michael Telahun Makonnen <mmakonnen@gmail.com>.
 #    All Rights Reserved.
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -20,34 +20,27 @@
 #
 
 {
-    'name': 'Manage Employee Contracts',
+    'name': 'Payroll Register Report',
     'version': '1.0',
     'category': 'Generic Modules/Human Resources',
     'description': """
-Employee Contract Workflow and Notifications
-============================================
-
-Easily find and keep track of employees who are nearing the end of their
-contracts and trial periods.
+Payroll Register Report
+=======================
+    - Complete list of employees and payroll lines
+    - Comprehensive report that includes all departments
+    - Printed Pay Slips
     """,
     'author': "Michael Telahun Makonnen <mmakonnen@gmail.com>,Odoo Community Association (OCA)",
     'website': 'http://miketelahun.wordpress.com',
     'license': 'AGPL-3',
     'depends': [
-        'hr_contract',
-        'hr_contract_init',
+        'hr_payroll_register',
+        'report_aeroo',
     ],
-    "external_dependencies": {
-        'python': ['dateutil'],
-    },
     'data': [
-        'security/ir.model.access.csv',
-        'hr_contract_cron.xml',
-        'hr_contract_data.xml',
-        'hr_contract_workflow.xml',
-        'hr_contract_view.xml',
+        'hr_payroll_register_report.xml',
     ],
     'test': [
     ],
-    'installable': True,
+    'installable': False,
 }
