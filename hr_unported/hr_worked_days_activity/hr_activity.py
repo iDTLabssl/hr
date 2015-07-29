@@ -60,11 +60,11 @@ class hr_activity(orm.Model):
             }
         }
 
-        name = fields.Char(
+    name = fields.Char(
             string='Activity Name',
             compute = '_get_activity_name'
         )
-        type = fields.Selection(
+    type = fields.Selection(
             (
                 ('leave', 'Leave'),
                 ('job', 'Job'),
@@ -72,16 +72,16 @@ class hr_activity(orm.Model):
             'Activity Type',
             required=True
         )
-        code = fields.Char(
+    code = fields.Char(
             'Code',
             help="Used for payslip computation"
         )
-        job_id = fields.Many2one(
+    job_id = fields.Many2one(
             'hr.job',
             'Job',
             ondelete='cascade'
         )
-        leave_id = fields.Many2one(
+    leave_id = fields.Many2one(
             'hr.holidays.status',
             'Leave Type',
             ondelete='cascade'
