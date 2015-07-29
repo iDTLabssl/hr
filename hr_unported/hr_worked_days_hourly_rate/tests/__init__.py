@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 ##############################################################################
 #
-#    Copyright (C) 2012 - 2014 Odoo Canada. All Rights Reserved.
+#    Copyright (C) 2014 Odoo Canada. All Rights Reserved.
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
@@ -19,15 +19,10 @@
 #
 ##############################################################################
 
-from openerp.osv import orm, fields
-from openerp import models, fields, api
+from . import (
+    test_hr_worked_days,
+)
 
-
-class hr_payslip_worked_days(orm.Model):
-
-    _name = 'hr.payslip.worked_days'
-    _inherit = 'hr.payslip.worked_days'
-
-    imported_from_timesheet = fields.Boolean('Imported From Timesheet',
-        default=False)
-
+checks = [
+    test_hr_worked_days,
+]

@@ -22,6 +22,7 @@ from openerp.osv import orm
 from openerp.tools.translate import _
 from datetime import datetime
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
+from openerp import models, fields, api
 
 
 class hr_payslip(orm.Model):
@@ -29,13 +30,12 @@ class hr_payslip(orm.Model):
     _inherit = 'hr.payslip'
 
     def timesheet_mapping(
-        self, cr, uid,
+        self,
         timesheet_sheets,
         payslip,
         date_from,
         date_to,
-        date_format,
-        context=None,
+        date_format
     ):
         """This function takes timesheet objects imported from the timesheet
         module and creates a dict of worked days to be created in the payslip.
@@ -67,14 +67,12 @@ class hr_payslip(orm.Model):
         return worked_days
 
     def import_worked_days(
-        self, cr, uid,
-        payslip_id,
-        context=None
+        self,payslip_id
     ):
         """This method retreives the employee's timesheets for a payslip period
         and creates worked days records from the imported timesheets
         """
-        payslip = self.browse(cr, uid, payslip_id, context=context)[0]
+        payslip = self.browse(payslip_id)[0]
         employee = payslip.employee_id
 
         date_from = payslip.date_from
@@ -83,17 +81,13 @@ class hr_payslip(orm.Model):
         # get user date format
         lang_pool = self.pool['res.lang']
         user_pool = self.pool['res.users']
-        code = user_pool.context_get(cr, uid).get('lang', 'en_US')
+        code = user_pool.context_get().get('lang', 'en_US')
         lang_id = lang_pool.search(
-            cr, uid,
-            [('code', '=', code)],
-            context=context
+            [('code', '=', code)]
         )
         date_format = lang_pool.read(
-            cr, uid,
             lang_id,
-            ['date_format'],
-            context=context
+            ['date_format']
         )[0]['date_format']
 
         # Delete old imported worked_days
@@ -107,7 +101,7 @@ class hr_payslip(orm.Model):
         ]
         self.pool.get(
             'hr.payslip.worked_days'
-        ).unlink(cr, uid, old_worked_days_ids, context)
+        ).unlink(old_worked_days_ids)
 
         # get timesheet sheets of employee
         timesheet_sheets = [
@@ -130,18 +124,15 @@ Sorry, but there is no approved Timesheets for the entire Payslip period"""),
 
         # The reason to call this method is for other modules to modify it.
         worked_days = self.timesheet_mapping(
-            cr, uid,
             timesheet_sheets,
             payslip,
             date_from,
             date_to,
             date_format,
-            context=context,
-        )
+            )
+        
         worked_days = [(0, 0, wd) for key, wd in worked_days.items()]
 
-        self.write(
-            cr, uid, payslip_id,
-            {'worked_days_line_ids': worked_days},
-            context=context
+        self.write(payslip_id,
+            {'worked_days_line_ids': worked_days}
         )
