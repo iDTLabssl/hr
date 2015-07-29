@@ -20,15 +20,15 @@
 ##############################################################################
 
 from openerp.osv import orm, fields
+from openerp import models, fields, api
 
 
 class hr_employee(orm.Model):
     _name = "hr.employee"
     _inherit = "hr.employee"
-    _columns = {
-        'timesheet_sheet_ids': fields.one2many(
+    
+    timesheet_sheet_ids = fields.One2many(
             'hr_timesheet_sheet.sheet',
             'employee_id',
             'Timesheets'
         )
-    }
