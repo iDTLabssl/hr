@@ -20,52 +20,50 @@
 #
 
 from openerp.osv import fields, orm
+from openerp import models, fields, api
 
 
 class policy_groups(orm.Model):
 
     _name = 'hr.policy.group'
     _description = 'HR Policy Groups'
-    _columns = {
-        'name': fields.char(
+       
+    name = fields.Char(
             'Name',
-            size=128,
-        ),
-        'contract_ids': fields.one2many(
+            size=128
+        )
+    contract_ids = fields.One2many(
             'hr.contract',
             'policy_group_id',
-            'Contracts',
-        ),
-    }
+            'Contracts'
+        )
 
 
 class contract_init(orm.Model):
 
     _inherit = 'hr.contract.init'
-    _columns = {
-        'policy_group_id': fields.many2one(
+    policy_group_id = fields.Many2one(
             'hr.policy.group',
             'Policy Group',
             readonly=True,
             states={
-                'draft': [('readonly', False)],
+                'draft': [('readonly', False)]
             }
-        ),
-    }
+        )
 
 
 class hr_contract(orm.Model):
 
     _name = 'hr.contract'
     _inherit = 'hr.contract'
-    _columns = {
-        'policy_group_id': fields.many2one(
+     
+    policy_group_id = fields.Many2one(
             'hr.policy.group',
             'Policy Group',
-        ),
-    }
+            default = '_get_policy_group'
+        )
 
-    def _get_policy_group(self, cr, uid, context=None):
+    def _get_policy_group(self):
 
         res = False
         init = self.get_latest_initial_values(cr, uid, context=context)
@@ -73,6 +71,3 @@ class hr_contract(orm.Model):
             res = init.policy_group_id.id
         return res
 
-    _defaults = {
-        'policy_group_id': _get_policy_group,
-    }
