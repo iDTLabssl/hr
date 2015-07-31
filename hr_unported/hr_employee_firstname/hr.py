@@ -21,12 +21,14 @@
 ##############################################################################
 
 from openerp.osv import orm, fields
+from openerp import models, fields, api
 
 
 class hr_employee(orm.Model):
     _inherit = 'hr.employee'
 
-    def init(self, cursor):
+    def init(self):
+        cursor = self.env.cr
         cursor.execute('''\
 SELECT id
 FROM hr_employee
@@ -38,7 +40,7 @@ UPDATE hr_employee
 SET lastname = name_related
 WHERE name_related IS NOT NULL''')
 
-    def create(self, cursor, uid, vals, context=None):
+    def create(self, vals):
         firstname = vals.get('firstname')
         lastname = vals.get('lastname')
         if firstname or lastname:
@@ -47,9 +49,7 @@ WHERE name_related IS NOT NULL''')
         else:
             vals['lastname'] = vals['name']
         return super(hr_employee, self).create(
-            cursor, uid, vals, context=context)
+            vals)
 
-    _columns = {
-        'firstname': fields.char("Firstname"),
-        'lastname': fields.char("Lastname", required=True)
-    }
+     firstname = fields.Char("Firstname")
+     lastname = fields.Char("Lastname", required=True)
