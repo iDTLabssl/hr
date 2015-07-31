@@ -21,6 +21,7 @@
 
 from openerp.osv import fields, orm
 from openerp.tools.translate import _
+from openerp import models, fields, api
 
 
 class hr_employee(orm.Model):
@@ -31,25 +32,25 @@ class hr_employee(orm.Model):
     _inherit = 'hr.employee'
 
     def _get_latest_contract(
-        self, cr, uid, ids, field_name, args, context=None
+        self,field_name, args
     ):
         res = {}
         obj_contract = self.pool.get('hr.contract')
-        for emp in self.browse(cr, uid, ids, context=context):
+        for emp in self.browse():
             contract_ids = obj_contract.search(
-                cr, uid, [('employee_id', '=', emp.id), ],
-                order='date_start', context=context)
+                [('employee_id', '=', emp.id), ],
+                order='date_start')
             if contract_ids:
                 res[emp.id] = contract_ids[-1:][0]
             else:
                 res[emp.id] = False
         return res
 
-    def _get_id_from_contract(self, cr, uid, ids, context=None):
+    def _get_id_from_contract(self):
 
         res = []
         for contract in self.pool.get('hr.contract').browse(
-            cr, uid, ids, context=context
+            ids
         ):
             res.append(contract.employee_id.id)
 
@@ -86,7 +87,7 @@ class hr_employee(orm.Model):
 
     def _default_country(self, cr, uid, context=None):
         
-        cid = self.env.['res.country'].search([('code', '=', 'ET')])
+        cid = self.env['res.country'].search([('code', '=', 'ET')])
         if cid:
             return cid[0]
 
