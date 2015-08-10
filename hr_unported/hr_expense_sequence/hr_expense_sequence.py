@@ -45,6 +45,7 @@ class hr_expense_expense(orm.Model):
         'unique(company_id, name)',
         'An expense with that number already exists in the same company !')]
 
+    @api.one
     def copy(self,default=None):
         if default is None:
             default = {}
@@ -53,6 +54,8 @@ class hr_expense_expense(orm.Model):
         default['description'] = _("%s (copy)") % (expense.description or '')
         return super(hr_expense_expense, self).copy(default=default)
 
+
+    @api.model
     def create(self,vals):
         if vals.get('name', '/') == '/':
             vals['name'] = self.pool['ir.sequence'].next_by_code('hr.expense.expense')

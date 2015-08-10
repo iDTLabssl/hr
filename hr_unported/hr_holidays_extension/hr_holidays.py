@@ -88,6 +88,7 @@ class hr_holidays(orm.Model):
             return ids[0]
         return False
 
+    @api.model
     def _days_get(self):
         cr, uid, context = self.env.args
         if context is None:
@@ -129,7 +130,7 @@ class hr_holidays(orm.Model):
 
         return False
 
-    api.onchange('number_of_days_temp')
+    @api.onchange('number_of_days_temp')
     def onchange_bynumber(self, no_days, date_from, employee_id,
             holiday_status_id):
         """
@@ -233,6 +234,7 @@ class hr_holidays(orm.Model):
                                 'real_days': real_days})
         return result
 
+
     @api.onchange('date_to')
     def onchange_enddate(self,employee_id, date_to, holiday_status_id):
 
@@ -269,6 +271,7 @@ class hr_holidays(orm.Model):
         res['value']['return_date'] = return_date.strftime('%B %d, %Y')
         return res
 
+    @api.model
     def create(self,vals):
 
         att_obj = self.pool.get('hr.attendance')
@@ -289,15 +292,18 @@ class hr_holidays(orm.Model):
                 )
         return super(hr_holidays, self).create(vals)
 
+    @api.model
     def holidays_first_validate(self):
 
         self._check_validate()
         return super(hr_holidays, self).holidays_first_validate()
 
+    @api.model
     def holidays_validate(self):
         self._check_validate()
         return super(hr_holidays, self).holidays_validate()
 
+    @api.multi
     def _check_validate(self):
         users_obj = self.pool.get('res.users')
         if not users_obj.has_group('base.group_hr_manager'):
