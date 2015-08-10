@@ -31,6 +31,7 @@ class hr_employee(orm.Model):
     _name = 'hr.employee'
     _inherit = 'hr.employee'
 
+    @api.model
     def _get_latest_contract(
         self,field_name, args
     ):
@@ -46,6 +47,8 @@ class hr_employee(orm.Model):
                 res[emp.id] = False
         return res
 
+    @api.depends('contract_id','contract_id.employee_id','contract_id.job_id')
+    @api.model
     def _get_id_from_contract(self):
 
         res = []
@@ -63,21 +66,13 @@ class hr_employee(orm.Model):
     #job_id = fields.Many2one('hr.job',string='Job', related='contract_id.job_id', onchange =_get_id_from_contract ,readonly=True, store =True )
     # basically updte own contract_id and job_id
     # when employee_id or job_id of hr.contract change
-        'job_id': fields.related(
+    job_id = fields.Many2one(
             'contract_id', 'job_id',
             type="many2one",
             obj="hr.job",
             string="Job",
-            method=True,
             readonly=True,
-            store={
-                'hr.contract': (
-                    _get_id_from_contract, ['employee_id', 'job_id'], 10),
-                'hr.employee': (
-                    lambda self, cr, uid, ids, context=None: ids,
-                    ['contract_id', 'active'], 10),
-            }
-        ),
+        )
     }
 
     _sql_constraints = [
@@ -85,17 +80,16 @@ class hr_employee(orm.Model):
          _('Official Identifications must be unique!')),
     ]
 
-    def _default_country(self, cr, uid, context=None):
+    @api.model
+    def _default_country(self):
         
         cid = self.env['res.country'].search([('code', '=', 'ET')])
         if cid:
             return cid[0]
 
-    _defaults = {
-        'country_id': _default_country,
-    }
+    country_id = fields.Integer(default ='default_country')
 
-hr_employee()
+    hr_employee()
 
 
 class hr_contract(orm.Model):
@@ -110,13 +104,14 @@ class hr_contract(orm.Model):
                               'State', default='draft' )    
 
 
-    def _default_employee(self, cr, uid, context=None):
+    @api.model
+    def _default_employee(self):
         if context is not None:
             e_ids = context.get('search_default_employee_id', False)
             if e_ids:
                 return e_ids[0]
 
-
+    @api.onchange('employee_id')
     def onchange_employee_id(self):
 
         if self.employee_id:
@@ -126,8 +121,8 @@ class hr_contract(orm.Model):
 
 
 class hr_job(orm.Model):
-
-    def _no_of_contracts(self, cr, uid, ids, name, args, context=None):
+    @api.model
+    def _no_of_contracts(self, name, args):
         res = {}
         for job in self:
             contract_ids = self.env[
@@ -139,7 +134,8 @@ class hr_job(orm.Model):
                 'expected_employees': nb + job.no_of_recruitment,
             }
         return res
-
+ 
+    @api.model
     def _get_job_position(self):
         res = []
         contract_obj = self.env['hr.contract']

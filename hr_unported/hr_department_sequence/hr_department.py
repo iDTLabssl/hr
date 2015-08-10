@@ -58,6 +58,8 @@ class hr_department(orm.Model):
     _parent_order = 'sequence, name'
     _order = 'parent_left'
 
+
+    @api.model
     def _rec_message(self):
         return _('The code for the department must be unique per company!')
 
@@ -65,6 +67,7 @@ class hr_department(orm.Model):
         ('code_uniq', 'unique(code, company_id)', _rec_message),
     ]
 
+    @api.model
     def name_get(self):
         """
         Show department code with name
@@ -85,6 +88,7 @@ class hr_department(orm.Model):
             for record in self.browse()
         ]
 
+    @api.model
     def name_search(
             self,name='', args=None, operator='ilike',
             limit=100):

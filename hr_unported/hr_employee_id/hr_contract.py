@@ -25,19 +25,20 @@ from openerp.osv import fields, orm
 class hr_contract(orm.Model):
 
     _inherit = 'hr.contract'
-    _columns = {
-        'name': fields.char(
+   name = fields.Char(
             'Contract Reference',
             size=32,
             required=False,
             readonly=True,
-        ),
-    }
+        )
 
-    def create(self, cr, uid, vals, context=None):
-        cid = super(hr_contract, self).create(cr, uid, vals, context)
+    @api.model
+    def create(self, vals):
+        #cr = self.env.cr
+        #uid = self.env.uid
+        cid = super(hr_contract, self).create(vals)
         if cid:
-            ref = self.pool.get('ir.sequence').get(cr, uid, 'contract.ref')
+            ref = self.pool.get('ir.sequence').get('contract.ref')
             self.pool.get('hr.contract').write(
-                cr, uid, cid, {'name': ref}, context=context)
+                cid{'name': ref})
         return cid

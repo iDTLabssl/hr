@@ -36,7 +36,7 @@ class hr_contract(orm.Model):
     _inherit = ['hr.contract', 'mail.thread', 'ir.needaction_mixin']
 
     
-    @api.multi
+    @api.depends('department_id')
     def _get_ids_from_employee(self):
 
         res = []
@@ -77,17 +77,12 @@ class hr_contract(orm.Model):
         # contract is in the right state: we don't want future changes to an
         # employee's department to impact past contracts that have now ended.
         # Increased priority to override hr_simplify.
-        'department_id': fields.function(
-            _get_department,
-            type='many2one',
-            method=True,
-            obj='hr.department',
+        department_id = fields.Many2one(
             string="Department",
+            'hr.department',
+            compute = '_get_department',
             readonly=True,
-            store={
-                'hr.employee': (_get_ids_from_employee, ['department_id'], 10)
-            },
-        ),
+        )
         # At contract end this field will hold the job_id, and the
         # job_id field will be set to null so that modules that
         # reference job_id don't include deactivated employees.

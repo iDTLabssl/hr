@@ -26,6 +26,7 @@ from openerp.addons import decimal_precision as dp
 from openerp.osv import fields, orm
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as OE_DFORMAT
 from openerp.tools.translate import _
+from openerp import models, fields, api
 
 
 class contract_init(orm.Model):
@@ -109,21 +110,25 @@ class contract_init(orm.Model):
 
     #Revisit. trg_delete method not avilable in new api
     # 
-    def set_to_draft(self, cr, uid, ids, context=None):
+    @api.multi
+    def set_to_draft(self):
         self.write({
             'state': 'draft',
         })
         wf_service = netsvc.LocalService("workflow")
-        for i in ids:
-            wf_service.trg_delete(uid, 'hr.contract.init', i, cr)
-            wf_service.trg_create(uid, 'hr.contract.init', i, cr)
+        i = 
+        for i in self.ids:
+            wf_service.trg_delete('hr.contract.init', i)
+            wf_service.trg_create(uid, 'hr.contract.init', i)
         return True
 
+    @api.one
     def state_approve(self):
 
         self.write({'state': 'approve'})
         return True
 
+    @api.one
     def state_decline(self):
 
         self.write({'state': 'decline'})
@@ -137,7 +142,7 @@ class init_wage(orm.Model):
 
         job_id = fields.Many2one(
             'hr.job',
-            'Job',
+            'Job'
         )
         starting_wage = fields.Float(
             'Starting Wage',
@@ -146,18 +151,18 @@ class init_wage(orm.Model):
         )
         is_default = fields.Boolean(
             'Use as Default',
-            help="Use as default wage",
+            help="Use as default wage"
         )
         contract_init_id = fields.Many2one(
             'hr.contract.init',
-            'Contract Settings',
+            'Contract Settings'
         )
         category_ids = fields.Many2many(
             'hr.employee.category',
             'contract_init_category_rel',
             'contract_init_id',
             'category_id',
-            'Tags',
+            'Tags'
         )
 
     def _rec_message(self):
@@ -190,6 +195,7 @@ class hr_contract(orm.Model):
 
     _inherit = 'hr.contract'
 
+    @api.multi
     def _get_wage(self, job_id=None):
 
         res = 0
@@ -221,6 +227,7 @@ class hr_contract(orm.Model):
             res = default
         return res
 
+    @api.one
     def _get_struct(self):
 
         res = False
@@ -229,6 +236,7 @@ class hr_contract(orm.Model):
             res = init.struct_id.id
         return res
 
+    @api.one
     def _get_trial_date_start(self):
 
         res = False
@@ -237,6 +245,7 @@ class hr_contract(orm.Model):
             res = datetime.now().strftime(OE_DFORMAT)
         return res
 
+    @api.one
     def _get_trial_date_end(self):
 
         res = False
@@ -246,13 +255,13 @@ class hr_contract(orm.Model):
             res = dEnd.strftime(OE_DFORMAT)
         return res
 
-    _defaults = {
-        'wage': _get_wage,
-        'struct_id': _get_struct,
-        'trial_date_start': _get_trial_date_start,
-        'trial_date_end': _get_trial_date_end,
-    }
+    wage = fields.Float(default= '_get_wage')
+    struct_id = fields.Many2one(default='_get_struct')
+    trial_date_start = fields.Date(default ='_get_trial_date_start')
+    trial_date_end =  fields.Date(default ='_get_trial_date_end')
+    
 
+    @api.onchange('job_id')
     def onchange_job(self,job_id):
 
         res = False
@@ -261,6 +270,7 @@ class hr_contract(orm.Model):
             res = {'value': {'wage': wage}}
         return res
 
+    @api.onchange('trial_date_start')
     def onchange_trial(self,trial_date_start):
 
         res = {'value': {'trial_date_end': False}}
