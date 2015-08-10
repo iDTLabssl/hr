@@ -40,7 +40,7 @@ class hr_employee(orm.Model):
 
     _inherit = 'hr.employee'
 
-    @api.one
+    @api.model
     def _calculate_age(self):
 
         for ee in self:

@@ -46,8 +46,8 @@ class hr_accrual(orm.Model):
             'Accrual Lines',
             readonly=True,
         )
-
-    def get_balance(self, cr, uid, ids, employee_id, date=None, context=None):
+    @api.model
+    def get_balance(self, employee_id, date=None):
 
         if date is None:
             date = time.strftime(OE_DATEFORMAT)

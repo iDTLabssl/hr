@@ -69,11 +69,15 @@ class hr_employee(orm.Model):
     #
     # Need to revisit this
     #
-    def state_active(self, cr, uid, ids, context=None):
+    @api.model
+    def state_active(self):
+        ids = self.ids
         if isinstance(ids, (int, long)):
             ids = [ids]
+       
+
         data = self.read(
-            cr, uid, ids, ['status', 'saved_department_id'], context=context
+            ['status', 'saved_department_id']
         )
         for d in data:
             if d.get('status') == 'pending_inactive':
@@ -82,35 +86,38 @@ class hr_employee(orm.Model):
                 else:
                     department_id = False
                 self.write(
-                    cr, uid, d['id'], {
+                    ['id'], {
                         'status': 'active',
                         'department_id': department_id,
                         'saved_department_id': False,
-                    }, context=context)
+                    })
             else:
-                self.write(cr, uid, ids, {'status': 'active'}, context=context)
+                self.write( {'status': 'active'})
 
         return True
 
-    def state_pending_inactive(self, cr, uid, ids, context=None):
+    @api.model
+    def state_pending_inactive(self):
+        ids = self.ids
+        
         if isinstance(ids, (int, long)):
             ids = [ids]
-        data = self.read(cr, uid, ids, ['department_id'], context=context)
+        data = self.read(['department_id'])
         for d in data:
             if d.get('department_id'):
                 saved_department_id = d['department_id'][0]
             else:
                 saved_department_id = False
-            self.write(cr, uid, d['id'], {
+            self.write(d['id'], {
                 'status': 'pending_inactive',
                 'saved_department_id': saved_department_id,
                 'department_id': False,
-            }, context=context)
+            })
         return True
 
             ids = [ids]
         data = self.read(
-            cr, uid, ids, ['status', 'saved_department_id'], context=context
+            ['status', 'saved_department_id']
         )
         for d in data:
             vals = {
@@ -129,12 +136,16 @@ class hr_employee(orm.Model):
                 })
 
             self.pool.get('hr.employee').write(
-                cr, uid, d['id'], vals, context=context)
+                d['id'], vals)
         return True
+    
+    @api.model
+    def signal_reactivate(self):
+        for employee in self.browse():
+            cr = self.env.cr
+            uid =self.env.uid
 
-    def signal_reactivate(self, cr, uid, ids, context=None):
-        for employee in self.browse(cr, uid, ids, context=context):
-            self.write(cr, uid, employee.id, {'active': True}, context=context)
+            self.write(employee.id, {'active': True})
             netsvc.LocalService('workflow').trg_validate(
                 uid, 'hr.employee', employee.id, 'signal_reactivate', cr)
         return True
@@ -215,15 +226,17 @@ class hr_employee_termination(orm.Model):
         },
     }
 
-    def _needaction_domain_get(self, cr, uid, context=None):
+
+    @api.model
+    def _needaction_domain_get(self):
 
         users_obj = self.pool.get('res.users')
         domain = []
 
-        if users_obj.has_group(cr, uid, 'base.group_hr_user'):
+        if users_obj.has_group('base.group_hr_user'):
             domain = [('state', 'in', ['draft'])]
 
-        if users_obj.has_group(cr, uid, 'base.group_hr_manager'):
+        if users_obj.has_group('base.group_hr_manager'):
             if len(domain) > 0:
                 domain = ['|'] + domain + [('state', '=', 'confirm')]
             else:
@@ -234,8 +247,9 @@ class hr_employee_termination(orm.Model):
 
         return False
 
-    def unlink(self, cr, uid, ids, context=None):
-        for term in self.browse(cr, uid, ids, context=context):
+    @api.model
+    def unlink(self):
+        for term in self.browse():
             if term.state not in ['draft']:
                 raise orm.except_orm(
                     _('Unable to delete record!'),
@@ -245,20 +259,20 @@ class hr_employee_termination(orm.Model):
             # to Open
             wkf = netsvc.LocalService('workflow')
             wkf.trg_validate(
-                uid, 'hr.employee', term.employee_id.id, 'signal_active', cr)
+                'hr.employee', term.employee_id.id, 'signal_active')
             for contract in term.employee_id.contract_ids:
                 if contract.state == 'pending_done':
                     wkf.trg_validate(
-                        uid, 'hr.contract', contract.id, 'signal_open', cr)
+                        'hr.contract', contract.id, 'signal_open')
 
         return super(hr_employee_termination, self).unlink(
-            cr, uid, ids, context=context
         )
 
-    def effective_date_in_future(self, cr, uid, ids, context=None):
+    @api.model
+    def effective_date_in_future(self):
 
         today = datetime.now().date()
-        for term in self.browse(cr, uid, ids, context=context):
+        for term in self.browse():
             effective_date = datetime.strptime(
                 term.name, DEFAULT_SERVER_DATE_FORMAT).date()
             if effective_date <= today:
@@ -266,29 +280,32 @@ class hr_employee_termination(orm.Model):
 
         return True
 
-    def state_cancel(self, cr, uid, ids, context=None):
+    @api.model
+    def state_cancel(self):
 
+        ids = self.ids
         if isinstance(ids, (int, long)):
             ids = [ids]
 
-        for term in self.browse(cr, uid, ids, context=context):
+        for term in self.browse():
 
             # Trigger a status change of the employee and his contract(s)
             wkf = netsvc.LocalService('workflow')
             wkf.trg_validate(
-                uid, 'hr.employee', term.employee_id.id, 'signal_active', cr)
+                'hr.employee', term.employee_id.id, 'signal_active')
             for contract in term.employee_id.contract_ids:
                 if contract.state == 'pending_done':
                     wkf.trg_validate(
-                        uid, 'hr.contract', contract.id, 'signal_open', cr)
+                        'hr.contract', contract.id, 'signal_open')
 
-            self.write(cr, uid, term.id, {'state': 'cancel'}, context=context)
+            self.write(term.id, {'state': 'cancel'})
 
         return True
 
-    def state_done(self, cr, uid, ids, context=None):
+    @api.model
+    def state_done(self):
 
-        for term in self.browse(cr, uid, ids, context=context):
+        for term in self.browse():
             if self.effective_date_in_future(
                     cr, uid, [term.id], context=context):
                 raise orm.except_orm(
@@ -302,13 +319,13 @@ class hr_employee_termination(orm.Model):
             for contract in term.employee_id.contract_ids:
                 if contract.state == 'pending_done':
                     wkf.trg_validate(
-                        uid, 'hr.contract', contract.id, 'signal_done', cr
+                        'hr.contract', contract.id, 'signal_done'
                     )
             wkf.trg_validate(
-                uid, 'hr.employee', term.employee_id.id, 'signal_inactive', cr
+                'hr.employee', term.employee_id.id, 'signal_inactive'
             )
 
-            self.write(cr, uid, term.id, {'state': 'done'}, context=context)
+            self.write(term.id, {'state': 'done'})
 
         return True
 
@@ -336,50 +353,52 @@ class hr_contract(orm.Model):
             'context': context
         }
 
-    def _state_common(self, cr, uid, ids, context=None):
+    @api.model
+    def _state_common(self):
 
         wkf = netsvc.LocalService('workflow')
-        for contract in self.browse(cr, uid, ids, context=context):
+        for contract in self.browse():
             if contract.employee_id.status == 'new':
                 wkf.trg_validate(
-                    uid, 'hr.employee', contract.employee_id.id,
-                    'signal_confirm', cr
+                    'hr.employee', contract.employee_id.id,
+                    'signal_confirm'
                 )
 
-    def state_trial(self, cr, uid, ids, context=None):
+    @api.model
+    def state_trial(self):
         """Override 'trial' contract state to also change employee
         state: new -> onboarding
         """
 
         res = super(hr_contract, self).state_trial(
-            cr, uid, ids, context=context
         )
-        self._state_common(cr, uid, ids, context=context)
+        self._state_common()
         return res
 
-    def state_open(self, cr, uid, ids, context=None):
+    @api.model
+    def state_open(self):
         """Override 'open' contract state to also change employee
         state: new -> onboarding
         """
 
         res = super(hr_contract, self).state_open(
-            cr, uid, ids, context=context
         )
-        self._state_common(cr, uid, ids, context=context)
+        self._state_common()
         return res
 
-    def try_signal_contract_completed(self, cr, uid, context=None):
+    @api.model
+    def try_signal_contract_completed(self):
 
         d = datetime.now().date()
-        ids = self.search(cr, uid, [
+        ids = self.search([
             ('state', '=', 'open'),
             ('date_end', '<', d.strftime(
                 DEFAULT_SERVER_DATE_FORMAT))
-        ], context=context)
+        ])
         if len(ids) == 0:
             return
 
-        for c in self.browse(cr, uid, ids, context=context):
+        for c in self.browse():
             vals = {
                 'name': c.date_end or time.strftime(
                     DEFAULT_SERVER_DATE_FORMAT
@@ -387,9 +406,10 @@ class hr_contract(orm.Model):
                 'employee_id': c.employee_id.id,
                 'reason': 'contract_end',
             }
-            self.setup_pending_done(cr, uid, c, vals, context=context)
+            self.setup_pending_done(c, vals)
 
-    def setup_pending_done(self, cr, uid, contract, term_vals, context=None):
+    @api.model
+    def setup_pending_done(self, contract, term_vals):
         """Start employee deactivation process."""
 
         term_obj = self.pool.get('hr.employee.termination')
@@ -399,14 +419,14 @@ class hr_contract(orm.Model):
         wkf = netsvc.LocalService('workflow')
         if not contract.employee_id.active:
             wkf.trg_validate(
-                uid, 'hr.contract', contract.id, 'signal_done', cr)
+                'hr.contract', contract.id, 'signal_done')
             return
 
         # Ensure there are not other open contracts
         #
         open_contract = False
         ee = self.pool.get('hr.employee').browse(
-            cr, uid, contract.employee_id.id, context=context)
+            contract.employee_id.id)
         for c2 in ee.contract_ids:
             if c2.id == contract.id or c2.state == 'draft':
                 continue
@@ -424,25 +444,25 @@ class hr_contract(orm.Model):
         # Also skip creating an employment termination if there is already one
         # in progress for this employee.
         term_ids = term_obj.search(
-            cr, uid, [
+            [
                 ('employee_id', '=', contract.employee_id.id),
                 ('state', 'in', ['draft', 'confirm'])
-            ], context=context)
+            ])
         if len(term_ids) > 0:
             return
 
-        term_obj.create(cr, uid, term_vals, context=context)
+        term_obj.create(term_vals)
 
         # Set the contract state to pending completion
         wkf = netsvc.LocalService('workflow')
         wkf.trg_validate(
-            uid, 'hr.contract', contract.id, 'signal_pending_done', cr
+            'hr.contract', contract.id, 'signal_pending_done'
         )
 
         # Set employee state to pending deactivation
         wkf.trg_validate(
-            uid, 'hr.employee', contract.employee_id.id,
-            'signal_pending_inactive', cr
+            'hr.employee', contract.employee_id.id,
+            'signal_pending_inactive'
         )
 
 
@@ -454,10 +474,12 @@ class hr_job(orm.Model):
     # Override calculation of number of employees in job. Remove employees for
     # which the termination process has already started.
     #
-    def _no_of_employee(self, cr, uid, ids, name, args, context=None):
+    
+    @api.model
+    def _no_of_employee(self,name, args):
         res = {}
         count = 0
-        for job in self.browse(cr, uid, ids, context=context):
+        for job in self.browse():
             count = len(
                 ee for ee in job.employee_ids
                 if ee.active and ee.status != 'pending_inactive'
@@ -468,9 +490,12 @@ class hr_job(orm.Model):
             }
         return res
 
-    def _get_job_position(self, cr, uid, ids, context=None):
+
+    #@api.one
+    #@api.depends('no_of_recruitment')
+    def _get_job_position(self):
         data = self.pool.get('hr.employee').read(
-            cr, uid, ids, ['job_id'], context=context
+            ['job_id']
         )
         return [d['job_id'][0] for d in data if d['job_id']]
 

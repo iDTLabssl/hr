@@ -27,6 +27,7 @@ from openerp import models, fields, api
 class hr_employee(orm.Model):
     _inherit = 'hr.employee'
 
+    @api.model
     def init(self):
         cursor = self.env.cr
         cursor.execute('''\
@@ -40,6 +41,7 @@ UPDATE hr_employee
 SET lastname = name_related
 WHERE name_related IS NOT NULL''')
 
+    @api.model
     def create(self, vals):
         firstname = vals.get('firstname')
         lastname = vals.get('lastname')
@@ -51,5 +53,5 @@ WHERE name_related IS NOT NULL''')
         return super(hr_employee, self).create(
             vals)
 
-     firstname = fields.Char("Firstname")
-     lastname = fields.Char("Lastname", required=True)
+    firstname = fields.Char("Firstname")
+    lastname = fields.Char("Lastname", required=True)

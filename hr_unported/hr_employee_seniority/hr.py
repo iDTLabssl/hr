@@ -33,6 +33,7 @@ class hr_employee(orm.Model):
 
     _inherit = 'hr.employee'
 
+    @api.model
     def _get_contracts_list(self, employee):
         """Return list of contracts in chronological order"""
 
@@ -56,12 +57,14 @@ class hr_employee(orm.Model):
 
         return contracts
 
+    @api.model
     def _get_days_in_month(self, d):
 
         last_date = d - timedelta(days=(d.day - 1)) + relativedelta(
             months= +1) + relativedelta(days= -1)
         return last_date.day
-
+   
+    @api.model
     def get_months_service_to_date(self):
         """Returns a dictionary of floats. The key is the employee id,
         and the value is number of months of employment.
@@ -122,6 +125,7 @@ class hr_employee(orm.Model):
 
         return res
 
+    @api.model
     def _get_employed_months(self):
 
         res = dict.fromkeys(ids, 0.0)
@@ -130,6 +134,7 @@ class hr_employee(orm.Model):
             res[k] = v[0]
         return res
 
+    @api.model
     def _search_amount(self):
         ids = set()
         for cond in args:
