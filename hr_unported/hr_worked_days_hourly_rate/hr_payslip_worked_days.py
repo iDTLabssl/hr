@@ -28,6 +28,7 @@ from openerp import models, fields, api
 class hr_payslip_worked_days(orm.Model):
     _inherit = 'hr.payslip.worked_days'
 
+    @api.model
     def _get_total(
         self, field_name, arg=None
     ):

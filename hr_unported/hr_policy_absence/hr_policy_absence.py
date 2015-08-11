@@ -35,6 +35,7 @@ class policy_absence(orm.Model):
     # Return records with latest date first
     _order = 'date desc'
 
+    @api.model
     def get_codes(self):
 
         res = []
@@ -43,13 +44,15 @@ class policy_absence(orm.Model):
          for line in self.browse().line_ids]
         return res
 
+    @api.model
     def paid_codes(self):
 
         res = []
         [res.append((line.code, line.name))
          for line in self.browse().line_ids if line.type == 'paid']
         return res
-
+   
+    @api.model
     def unpaid_codes(self):
 
         res = []
@@ -89,6 +92,7 @@ class policy_line_absence(orm.Model):
                  'by other leaves.'
         )
 
+    @api.onchange('holiday_status_id')
     def onchange_holiday(self, holiday_status_id):
 
         res = {'value': {'name': False, 'code': False}}

@@ -63,10 +63,11 @@ class hr_contract(orm.Model):
             default = '_get_policy_group'
         )
 
+    @api.model
     def _get_policy_group(self):
 
         res = False
-        init = self.get_latest_initial_values(cr, uid, context=context)
+        init = self.get_latest_initial_values()
         if init is not None and init.policy_group_id:
             res = init.policy_group_id.id
         return res

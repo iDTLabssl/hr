@@ -36,6 +36,7 @@ class policy_ot(orm.Model):
     # Return records with latest date first
     _order = 'date desc'
 
+    @api.model
     def get_codes(self):
 
         res = []
@@ -43,6 +44,7 @@ class policy_ot(orm.Model):
          for line in self.browse().line_ids]
         return res
 
+    @api.model
     def daily_codes(self):
 
         res = []
@@ -51,6 +53,7 @@ class policy_ot(orm.Model):
             ).line_ids if line.type == 'daily']
         return res
 
+    @api.model
     def restday_codes(self):
         return [
             (line.code, line.name)
@@ -58,6 +61,7 @@ class policy_ot(orm.Model):
             if line.type == 'weekly' and line.active_after_units == 'day'
         ]
 
+    @api.model
     def restday2_codes(self):
 
         res = []
@@ -65,6 +69,7 @@ class policy_ot(orm.Model):
          for line in self.browse().line_ids if line.type == 'restday']
         return res
 
+    @api.model
     def weekly_codes(self):
         return [
             (line.code, line.name)
@@ -72,6 +77,7 @@ class policy_ot(orm.Model):
             if line.type == 'weekly' and line.active_after_units == 'min'
         ]
 
+    @api.model
     def holiday_codes(self):
         return [
             (line.code, line.name)
@@ -84,6 +90,7 @@ class policy_line_ot(orm.Model):
 
     _name = 'hr.policy.line.ot'
 
+    @api.model
     def _tz_list(self):
 
         res = tuple()

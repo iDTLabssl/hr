@@ -86,6 +86,7 @@ class hr_payslip_amendment(orm.Model):
         val = {'name': name}
         return {'value': val}
 
+    @api.multi
     def unlink(self):
 
         for psa in self.browse():

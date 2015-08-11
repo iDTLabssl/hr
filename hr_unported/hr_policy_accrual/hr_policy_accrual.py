@@ -64,6 +64,7 @@ class hr_policy(orm.Model):
     # Return records with latest date first
     _order = 'date desc'
 
+    @api.model
     def get_latest_policy(self, policy_group, dToday):
         """Return an accrual policy with an effective date before dToday
         but greater than all the others"""
@@ -84,6 +85,7 @@ class hr_policy(orm.Model):
 
         return res
 
+    @api.model
     def _calculate_and_deposit(
         self, line, employee, job_id, dToday=None
     ):
@@ -249,6 +251,7 @@ class hr_policy(orm.Model):
             job_id, {'accrual_line_ids': [
                 (4, acr_id)], 'holiday_ids': [(4, holiday_id)]})
 
+    @api.model
     def _get_last_calculation_date(self, accrual_id):
 
         job_obj = self.pool.get('hr.policy.line.accrual.job')
@@ -263,6 +266,7 @@ class hr_policy(orm.Model):
         data = job_obj.read(job_ids[0], ['name'])
         return datetime.strptime(data['name'], OE_DATEFORMAT).date()
 
+    @api.model
     def try_calculate_accruals(self):
 
         pg_obj = self.pool.get('hr.policy.group')
@@ -459,6 +463,7 @@ class hr_holidays(orm.Model):
                  'allocations',
             readonly=True)
 
+    @api.model
     def _do_accrual(
         self, today, holiday_status_id, employee_id, days
     ):
@@ -488,6 +493,7 @@ class hr_holidays(orm.Model):
 
         return
 
+    @api.model
     def holidays_validate(self):
 
         res = super(hr_holidays, self).holidays_validate()
@@ -516,6 +522,7 @@ class hr_holidays(orm.Model):
 
         return res
 
+    @api.model
     def holidays_refuse(self):
 
         #if isinstance(ids, (int, long)):

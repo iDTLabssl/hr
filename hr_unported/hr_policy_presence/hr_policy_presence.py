@@ -37,6 +37,7 @@ class policy_presence(orm.Model):
     # Return records with latest date first
     _order = 'date desc'
 
+    @api.model
     def get_codes(self):
 
         res = []

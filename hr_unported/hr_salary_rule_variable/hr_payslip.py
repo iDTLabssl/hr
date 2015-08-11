@@ -28,6 +28,7 @@ from openerp import models, fields, api
 class hr_payslip(orm.Model):
     _inherit = 'hr.payslip'
 
+    @api.multi
     def get_rule_variable(
         self,rule_id, date, localdict=False):
         """

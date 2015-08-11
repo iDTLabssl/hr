@@ -63,6 +63,7 @@ class hr_payroll_register(orm.Model):
             _('Payroll Register description must be unique.')),
     ]
 
+    @api.model
     def _get_default_name(self):
 
         nMonth = datetime.now().strftime('%B')
@@ -70,7 +71,7 @@ class hr_payroll_register(orm.Model):
         name = _('Payroll for the Month of %s %s' % (nMonth, year))
         return name
 
-    @api.one
+    @api.model
     def _get_company(self):
 
         users_pool = self.env.get('res.users')
@@ -80,6 +81,7 @@ class hr_payroll_register(orm.Model):
                                          'id', '=', uid)])).company_id.id
 
 
+    @api.model
     def action_delete_runs(self):
 
         pool = self.env.get('hr.payslip.run')

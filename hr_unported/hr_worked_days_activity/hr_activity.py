@@ -52,6 +52,7 @@ class hr_activity(orm.Model):
 
         return res
 
+    @api.onchange('type')
     def onchange_activity_type(self):
         return {
             'value': {

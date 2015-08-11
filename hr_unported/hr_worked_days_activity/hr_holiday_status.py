@@ -43,6 +43,7 @@ class hr_holidays_status(orm.Model):
     #    ]
     #}
 
+    @api.model
     def name_get(self):
         # There is a missing context check in
         # addons/hr_holidays/hr_holidays.py

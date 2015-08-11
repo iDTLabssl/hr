@@ -61,6 +61,7 @@ class hr_holidays(orm.Model):
     ]
 
 
+    @api.model
     def is_public_holiday(self,employee_id=None):
         employee = self.pool['hr.employee'].browse(employee_id)
 
@@ -98,6 +99,7 @@ class hr_holidays(orm.Model):
 
         return False
 
+    @api.model
     def get_holidays_list(self, employee_id=None):
 
         res = []

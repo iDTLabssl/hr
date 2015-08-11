@@ -35,7 +35,7 @@ class hr_attendance(orm.Model):
         ), 'State', required=True, readonly=True,
             default = 'draft')
 
-
+    @api.model
     def is_locked(self, employee_id, utcdt_str):
 
         res = False
@@ -60,6 +60,7 @@ class hr_attendance(orm.Model):
 
         return res
 
+    @api.model
     def create(self, vals):
 
         if self.is_locked(
@@ -74,6 +75,7 @@ class hr_attendance(orm.Model):
 
         return super(hr_attendance, self).create(vals)
 
+    @api.multi
     def unlink(self):
         ids = self.search()
         if isinstance(ids, (int, long)):
@@ -91,6 +93,7 @@ class hr_attendance(orm.Model):
 
         return super(hr_attendance, self).unlink()
 
+    @api.model
     def write(self,vals):
         ids = self.search()
 

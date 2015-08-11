@@ -19,7 +19,7 @@
 #
 ###############################################################################
 from openerp.osv import fields, orm
-
+from openerp import models, fields, api
 
 class hr_employee(orm.Model):
     _inherit = 'hr.employee'

@@ -71,6 +71,7 @@ class hr_job(orm.Model):
     _parent_order = 'name'
     _order = 'parent_left'
 
+    @api.model
     def _check_recursion(self):
 
         # Copied from product.category
@@ -90,6 +91,7 @@ class hr_job(orm.Model):
             level -= 1
         return True
 
+    @api.model
     def _rec_message(self):
         return _('Error!\nYou cannot create recursive jobs.')
 
@@ -97,6 +99,7 @@ class hr_job(orm.Model):
         (_check_recursion, _rec_message, ['parent_id']),
     ]
 
+    @api.multi
     def write(self,vals):
 
         res = super(hr_job, self).write(cr, uid, ids, vals, context=None)
@@ -197,7 +200,8 @@ class hr_contract(orm.Model):
                         )
 
         return res
-
+    
+    @api.multi
     def write(self, vals):
        
         ids = self.search()

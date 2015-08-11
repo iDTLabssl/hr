@@ -92,6 +92,7 @@ class hr_payroll_period(orm.Model):
         },
     }
 
+    @api.model
     def _needaction_domain_get(self):
 
         users_obj = self.pool.get('res.users')
@@ -103,6 +104,7 @@ class hr_payroll_period(orm.Model):
 
         return False
 
+    @api.model
     def is_ended(self, period_id):
 
         #
@@ -124,6 +126,7 @@ class hr_payroll_period(orm.Model):
                     flag = True
         return flag
 
+    @api.model
     def try_signal_end_period(self):
         """Method called, usually by cron, to transition any payroll periods
         that are past their end date.
@@ -149,6 +152,7 @@ class hr_payroll_period(orm.Model):
             wf_service.trg_validate(
             'hr.payroll.period', pid, 'end_period')
 
+    @api.model
     def set_state_ended(self):
 
         #
@@ -214,6 +218,7 @@ class hr_payroll_period(orm.Model):
 
         return True
 
+    @api.model
     def set_state_locked(self):
 
         #
@@ -277,15 +282,17 @@ class hr_payroll_period(orm.Model):
 
         return True
 
+    @api.one
     def set_state_closed(self):
 
-        return self.write({'state': 'closed'}, context=context)
+        return self.write({'state': 'closed'})
 
 
 class hr_payperiod_schedule(orm.Model):
 
     _name = 'hr.payroll.period.schedule'
 
+    @api.model
     def _tz_list(self):
 
         res = tuple()
@@ -350,7 +357,7 @@ class hr_payperiod_schedule(orm.Model):
     initial_period_date = fields.Date('Initial Period Start Date')
     active = fields.Boolean('Active', default = True)
 
-
+    @api.multi
     def _check_initial_date(self):
 
         for obj in self.browse():
@@ -364,6 +371,7 @@ class hr_payperiod_schedule(orm.Model):
          'You must supply an Initial Period Start Date', ['type']),
     ]
 
+    @api.model
     def add_pay_period(self):
 
         def get_period_year(dt):
@@ -466,6 +474,7 @@ class hr_payperiod_schedule(orm.Model):
                     sched.id,
                     {'pay_period_ids': [(0, 0, data)]})
 
+    @api.multi
     def _get_latest_period(self,sched_id):
 
         sched = self.browse(sched_id)
@@ -478,6 +487,7 @@ class hr_payperiod_schedule(orm.Model):
             latest_period = False
         return latest_period
 
+    @api.model
     def try_create_new_period(self):
         """Try and create pay periods for up to 3 months from now."""
 
@@ -541,6 +551,7 @@ class hr_contract(orm.Model):
             required=True,
             default = '_get_pay_sched')
 
+    @api.model
     def _get_pay_sched(self):
 
         res = False
@@ -559,6 +570,7 @@ class hr_payslip(orm.Model):
     exception_ids = fields.One2many('hr.payslip.exception', 'slip_id',
                                          'Exceptions', readonly=True)
 
+    @api.model
     def compute_sheet(self):
 
         super(hr_payslip, self).compute_sheet()
@@ -580,6 +592,7 @@ class hr_payslip(orm.Model):
             """a class that will be used into the python code, mainly for
             usability purposes"""
 
+            @api.model
             def sum(self, code, from_date, to_date=None):
                 if to_date is None:
                     to_date = datetime.now().strftime('%Y-%m-%d')
@@ -598,6 +611,7 @@ class hr_payslip(orm.Model):
             """a class that will be used into the python code, mainly
             for usability purposes"""
 
+            @api.model
             def _sum(self, code, from_date, to_date=None):
                 if to_date is None:
                     to_date = datetime.now().strftime('%Y-%m-%d')
@@ -611,10 +625,12 @@ class hr_payslip(orm.Model):
                     (self.employee_id, from_date, to_date, code))
                 return self.cr.fetchone()
 
+            @api.model
             def sum(self, code, from_date, to_date=None):
                 res = self._sum(code, from_date, to_date)
                 return res and res[0] or 0.0
 
+            @api.model
             def sum_hours(self, code, from_date, to_date=None):
                 res = self._sum(code, from_date, to_date)
                 return res and res[1] or 0.0
@@ -624,6 +640,7 @@ class hr_payslip(orm.Model):
             """a class that will be used into the python code, mainly for
             usability purposes"""
 
+            @api.model
             def sum(self, code, from_date, to_date=None):
                 if to_date is None:
                     to_date = datetime.now().strftime('%Y-%m-%d')
@@ -850,7 +867,7 @@ class hr_holidays(orm.Model):
             'Payroll Period State', readonly=True,
             defualt = 'unlocked')
 
-
+    @api.multi
     def unlink(self):
         for h in self.browse():
             if h.payroll_period_state == 'locked':
@@ -861,6 +878,7 @@ class hr_holidays(orm.Model):
                 )
         return super(hr_holidays, self).unlink()
 
+    @api.model
     def write(self, vals):
         for h in self.browse():
             if h.payroll_period_state == 'locked' and not vals.get(

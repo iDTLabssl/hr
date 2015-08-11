@@ -42,6 +42,7 @@ class hr_job(orm.Model):
         )
 
     # Do not write negative values for no. of recruitment
+    @api.multi
     def write(self,vals):
 
         value = vals.get('no_of_recruitment', False)
@@ -56,6 +57,7 @@ class hr_applicant(orm.Model):
     _name = 'hr.applicant'
     _inherit = 'hr.applicant'
 
+    @api.model
     def create(self, vals):
 
         if vals.get('job_id', False):
@@ -84,6 +86,7 @@ class hr_contract(orm.Model):
     _name = 'hr.contract'
     _inherit = 'hr.contract'
 
+    @api.model
     def _get_job_from_applicant(self):
         """If the applicant went through recruitment get the job id
         from there.
@@ -111,7 +114,7 @@ class hr_contract(orm.Model):
 
     job_id = fileds.Integer(default = '_get_job_from_applicant')
 
-
+    @api.model
     def create(self,vals):
 
         # If the contract is for an employee with a pre-existing contract for
@@ -255,6 +258,7 @@ class hr_recruitment_request(orm.Model):
         },
     }
 
+    @api.onchange('job_id')
     def onchange_job(self,job_id):
 
         res = {'value': {'deparment_id': False, 'name': False}}
@@ -267,6 +271,7 @@ class hr_recruitment_request(orm.Model):
 
         return res
 
+    @api.model
     def _needaction_domain_get(self):
 
         users_obj = self.pool.get('res.users')
@@ -286,6 +291,7 @@ class hr_recruitment_request(orm.Model):
 
         return domain
 
+    @api.multi
     def condition_exception(self):
 
         for req in self.browse():
@@ -295,7 +301,8 @@ class hr_recruitment_request(orm.Model):
 
         return False
 
-
+   
+    @api.multi
     def _state(self, state):
 
         job_obj = self.pool.get('hr.job')
@@ -315,6 +322,7 @@ class hr_recruitment_request(orm.Model):
 
         return True
 
+    @api.model
     def _state_subscribe_users(self, state):
 
         imd_obj = self.pool.get('ir.model.data')
@@ -330,17 +338,22 @@ class hr_recruitment_request(orm.Model):
 
         return self._state(state)
 
+    @api.model
     def state_confirm(self):
         return self._state_subscribe_users('confirm' )
 
+    @api.model
     def state_exception(self):
         return self._state_subscribe_users('exception')
 
-    def state_recruitment(self, cr, uid, ids, context=None):
+    @api.model
+    def state_recruitment(self):
         return self._state_subscribe_users('recruitment' )
 
+    @api.model
     def state_done(self):
         return self._state('done')
 
+    @api.model
     def state_cancel(self):
         return self._state('cancel')
