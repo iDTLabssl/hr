@@ -20,6 +20,7 @@
 #
 
 from openerp.osv import fields, orm
+from openerp import models, fields, api
 
 
 class hr_employee(orm.Model):
@@ -69,7 +70,7 @@ class hr_employee(orm.Model):
             'State',
             domain="[('country_id','=',country_id)]",
         )
-    }
+    
 
     @api.model
     def _get_country(self):

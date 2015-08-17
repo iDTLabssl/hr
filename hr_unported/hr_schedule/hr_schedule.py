@@ -31,6 +31,8 @@ from openerp.osv import fields, orm
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as OE_DTFORMAT
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as OE_DFORMAT
 from openerp.tools.translate import _
+from openerp import models, fields, api
+
 
 import logging
 _logger = logging.getLogger(__name__)

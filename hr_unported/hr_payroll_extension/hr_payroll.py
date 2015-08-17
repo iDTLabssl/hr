@@ -1197,12 +1197,12 @@ class hr_payslip_line(orm.Model):
 
     _name = 'hr.payslip.line'
     _inherit = 'hr.payslip.line'
-    _columns = {
-        'amount': fields.float(
+    
+    amount = fields.Float(
             'Amount',
-            digits_compute=dp.get_precision('Intermediate Payroll'),
-        ),
-    }
+            digits_compute=dp.get_precision('Intermediate Payroll')
+        )
+    
 
 
 class hr_attendance(orm.Model):
@@ -1647,27 +1647,22 @@ class hr_contract(orm.Model):
                                        ('salary', 'Salary')),
                                       'Wage Type', required=True,
                                        default = 'salary')
-    _columns = {
 
-        'wage_hourly': fields.function(
-            _hourly,
-            type='float',
-            digits_compute=dp.get_precision('Intermediate Payroll'),
-            string='Hourly Wages',
-        ),
-        'wage_daily': fields.function(
-            _daily,
-            type='float',
-            digits_compute=dp.get_precision('Intermediate Payroll'),
+    wage_hourly = fields.Float(
+             string='Hourly Wages',
+            compute= '_hourly',
+            digits_compute=dp.get_precision('Intermediate Payroll')
+        )
+    wage_daily = fields.Float(
             string='Daily Wages',
-        ),
-        'wage_monthly': fields.function(
-            _monthly,
-            type='float',
-            digits_compute=dp.get_precision('Intermediate Payroll'),
+            compute = '_daily',
+            digits_compute=dp.get_precision('Intermediate Payroll')
+        )
+    wage_monthly = fields.Float(
             string='Monthly Wages',
-        ),
-    }
+            compute = '_monthly',
+            digits_compute=dp.get_precision('Intermediate Payroll')
+        )
 
 
 class hr_salary_rule(orm.Model):
@@ -1691,7 +1686,7 @@ class hr_payslip_worked_days(orm.Model):
     _name = 'hr.payslip.worked_days'
     _inherit = 'hr.payslip.worked_days'
 
-        'rate': fields.Float(
+    rate = fields.Float(
             'Rate',
             required=True,
             default = 0.0

@@ -46,5 +46,5 @@ the data.""",
     ],
     'test': [
     ],
-    'installable': False,
+    'installable': True,
 }

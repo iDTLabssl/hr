@@ -20,6 +20,7 @@
 ##############################################################################
 
 from openerp.osv import orm
+from openerp import models, fields, api
 
 
 class hr_payslip(orm.Model):
